@@ -37,7 +37,7 @@ tabP2P.addEventListener('click', () => switchTab('P2P', tabP2P, tabPaybill, tabT
 tabPaybill.addEventListener('click', () => switchTab('PAYBILL', tabPaybill, tabP2P, tabTill));
 tabTill.addEventListener('click', () => switchTab('TILL', tabTill, tabP2P, tabPaybill));
 
-// --- 2. 2026 M-PESA TARIFF ENGINE EXECUTOR ---
+// --- 2. M-PESA TARIFF ENGINE EXECUTOR ---
 mpesaInput.addEventListener('input', runTariffCalculation);
 
 function runTariffCalculation() {
@@ -65,7 +65,7 @@ function runTariffCalculation() {
         else if (amount >= 20001 && amount <= 250000) { sendFee = 108; withdrawFee = 309; }
 
         costLeft.innerText = `Ksh ${sendFee}`;
-        costRight.innerText = amount > 150000 ? "Above Limit" : `Ksh ${withdrawFee}`;
+        costRight.innerText = amount > 250000 ? "Above Limit" : `Ksh ${withdrawFee}`;
 
     } else if (calculationMode === 'PAYBILL') {
         labelOutputLeft.innerText = "Customer Charge (Paybill)";
@@ -90,7 +90,6 @@ function runTariffCalculation() {
         labelOutputLeft.innerText = "Customer Fee (Buy Goods)";
         labelOutputRight.innerText = "Merchant Commission (0.5%)";
         
-        // Till payments are free for consumers. Merchant pays standard 0.5% commission capped at Ksh 200
         let merchantFee = amount <= 200 ? 0 : Math.min(amount * 0.005, 200);
 
         costLeft.innerText = `Ksh 0`;
@@ -108,13 +107,11 @@ addItemBtn.addEventListener('click', () => {
 
     let vatAmount = 0;
     if (isVatApplicable) {
-        // Compute internal KRA 16% VAT portion from total retail price
         vatAmount = price - (price / 1.16);
     }
 
     receiptItems.push({ name, price, vatAmount });
     
-    // Clear item block smoothly
     itemNameInput.value = "";
     itemPriceInput.value = "";
     itemVatCheckbox.checked = false;
@@ -152,7 +149,6 @@ function updateReceiptDisplay() {
     receiptPreview.value = textStructure;
 }
 
-// Global Text Copy Action Handler
 copyReceiptBtn.addEventListener('click', () => {
     if (receiptItems.length === 0) return;
     

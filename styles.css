@@ -1,4 +1,3 @@
-/* Custom Scrollbars for the WhatsApp Textarea Preview Box */
 textarea#receiptPreview::-webkit-scrollbar {
     width: 6px;
 }
@@ -14,12 +13,10 @@ textarea#receiptPreview::-webkit-scrollbar-thumb:hover {
     background: #10b981;
 }
 
-/* Form Input Animations */
 input, button {
     transition: all 0.2s ease-in-out;
 }
 
-/* Soft Advertisement Banner Pulse Effect */
 @keyframes softPulse {
     0%, 100% {
         transform: scale(1);
