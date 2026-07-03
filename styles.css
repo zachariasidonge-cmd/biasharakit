@@ -2,27 +2,24 @@
 textarea#receiptPreview::-webkit-scrollbar {
     width: 6px;
 }
-
 textarea#receiptPreview::-webkit-scrollbar-track {
-    background: #0f172a; /* Slate 900 background */
+    background: #0f172a;
     border-radius: 12px;
 }
-
 textarea#receiptPreview::-webkit-scrollbar-thumb {
-    background: #334155; /* Slate 700 handle */
+    background: #334155;
     border-radius: 12px;
 }
-
 textarea#receiptPreview::-webkit-scrollbar-thumb:hover {
-    background: #10b981; /* Emerald 500 on hover */
+    background: #10b981;
 }
 
-/* Form Input Focus Overrides for Smoother Transitions */
+/* Form Input Animations */
 input, button {
     transition: all 0.2s ease-in-out;
 }
 
-/* Premium Visual Pulse Effect for the Monetization Advertisement Bar */
+/* Soft Advertisement Banner Pulse Effect */
 @keyframes softPulse {
     0%, 100% {
         transform: scale(1);
@@ -33,7 +30,6 @@ input, button {
         box-shadow: 0 0 12px 4px rgba(79, 70, 229, 0.1);
     }
 }
-
 .ad-banner {
     animation: softPulse 4s infinite ease-in-out;
 }
