@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiasharaKit - Smart SME Hub</title>
+    <!-- Tailwind CSS CDN for smooth layout styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom styling link -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- Top Navigation -->
+    <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wide">🇰🇪 BiasharaKit</h1>
+            <span class="text-xs bg-indigo-700 px-3 py-1 rounded-full border border-indigo-400">100% Offline-First</span>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto p-4 space-y-8">
+        
+        <!-- MODULE 1: M-PESA SMART CALCULATOR -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <div class="flex items-center space-x-2 mb-4">
+                <span class="text-2xl">💰</span>
+                <h2 class="text-lg font-bold text-slate-900">M-Pesa Tariff Cost Calculator</h2>
+            </div>
+            <p class="text-sm text-slate-500 mb-6">Type an amount to calculate current transaction rates instantly.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Transaction Amount (Ksh)</label>
+                    <input type="number" id="mpesaAmount" placeholder="e.g. 1500" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-lg font-medium">
+                </div>
+                
+                <!-- Calculation Outputs -->
+                <div class="grid grid-cols-2 gap-3 pt-2">
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <span class="text-xs text-slate-500 block">Send to M-Pesa User</span>
+                        <span id="costSend" class="text-xl font-bold text-slate-900">Ksh 0</span>
+                    </div>
+                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                        <span class="text-xs text-slate-500 block">Agent Withdrawal Fee</span>
+                        <span id="costWithdraw" class="text-xl font-bold text-slate-900">Ksh 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MODULE 2: WHATSAPP RECEIPT GENERATOR -->
+        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+            <div class="flex items-center space-x-2 mb-4">
+                <span class="text-2xl">📝</span>
+                <h2 class="text-lg font-bold text-slate-900">Smart WhatsApp Receipt Builder</h2>
+            </div>
+            <p class="text-sm text-slate-500 mb-6">Build an item list. It auto-formats text clean enough to send customers via WhatsApp Business.</p>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Input Controls -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Business Name</label>
+                        <input type="text" id="bizName" value="My Duka" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Item Name</label>
+                            <input type="text" id="itemName" placeholder="Sugar 1kg" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Price</label>
+                            <input type="number" id="itemPrice" placeholder="160" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                        </div>
+                    </div>
+                    <button id="addItemBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition text-sm">
+                        + Add Item to List
+                    </button>
+                </div>
+
+                <!-- Live Raw Receipt Preview Panel -->
+                <div class="flex flex-col">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Receipt Raw Text Preview</label>
+                    <textarea id="receiptPreview" readonly class="w-full bg-slate-900 text-emerald-400 font-mono text-sm p-4 rounded-xl flex-grow h-48 focus:outline-none border-none resize-none" placeholder="Your formatted receipt will update here..."></textarea>
+                    
+                    <button id="copyReceiptBtn" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition text-sm flex items-center justify-center space-x-2">
+                        <span>Copy for WhatsApp</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- MONETIZATION / PARTNER BANNER PLACEHOLDER -->
+        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-center ad-banner">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 block mb-1">Sponsorship Space Available</span>
+            <p class="text-xs text-indigo-900">Are you a local wholesale merchant or micro-lender? Ad spaces here start from Ksh 500/month. Contact: your-email@domain.com</p>
+        </div>
+
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
