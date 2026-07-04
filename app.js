@@ -1,330 +1,561 @@
-// =============================================
-// BiasharaKit v2.1 - Premium Offline SME Toolkit
-// Modern, responsive, glassmorphism UI with persistence
-// =============================================
+const STORAGE_KEY = "biasharakit.v3.state";
 
-let receiptItems = [];
-let calculationMode = 'P2P';
-let receiptNumber = 1;
+const defaultState = {
+  theme: "light",
+  mode: "p2p",
+  nextReceiptNumber: 1,
+  receiptNumber: 1,
+  business: {
+    name: "My Duka",
+    phone: "",
+    location: "",
+    pin: ""
+  },
+  customerName: "",
+  items: []
+};
 
-// DOM Elements
-const mpesaInput = document.getElementById('mpesaAmount');
-const costLeft = document.getElementById('costLeft');
-const costRight = document.getElementById('costRight');
-const labelOutputLeft = document.getElementById('labelOutputLeft');
-const labelOutputRight = document.getElementById('labelOutputRight');
+const els = {
+  themeToggle: document.querySelector("#themeToggle"),
+  themeIcon: document.querySelector("#themeIcon"),
+  segments: document.querySelectorAll(".segment"),
+  mpesaAmount: document.querySelector("#mpesaAmount"),
+  labelOutputLeft: document.querySelector("#labelOutputLeft"),
+  labelOutputRight: document.querySelector("#labelOutputRight"),
+  costLeft: document.querySelector("#costLeft"),
+  costRight: document.querySelector("#costRight"),
+  tariffNote: document.querySelector("#tariffNote"),
+  receiptForm: document.querySelector("#receiptForm"),
+  receiptNumberLabel: document.querySelector("#receiptNumberLabel"),
+  businessName: document.querySelector("#businessName"),
+  businessPhone: document.querySelector("#businessPhone"),
+  businessLocation: document.querySelector("#businessLocation"),
+  businessPin: document.querySelector("#businessPin"),
+  customerName: document.querySelector("#customerName"),
+  editingItemId: document.querySelector("#editingItemId"),
+  itemName: document.querySelector("#itemName"),
+  itemQty: document.querySelector("#itemQty"),
+  itemPrice: document.querySelector("#itemPrice"),
+  itemVat: document.querySelector("#itemVat"),
+  saveItemBtn: document.querySelector("#saveItemBtn"),
+  cancelEditBtn: document.querySelector("#cancelEditBtn"),
+  clearListBtn: document.querySelector("#clearListBtn"),
+  itemsList: document.querySelector("#itemsList"),
+  receiptPreview: document.querySelector("#receiptPreview"),
+  newReceiptBtn: document.querySelector("#newReceiptBtn"),
+  copyReceiptBtn: document.querySelector("#copyReceiptBtn"),
+  printBtn: document.querySelector("#printBtn"),
+  downloadPdfBtn: document.querySelector("#downloadPdfBtn"),
+  toast: document.querySelector("#toast")
+};
 
-const tabP2P = document.getElementById('tabP2P');
-const tabPaybill = document.getElementById('tabPaybill');
-const tabTill = document.getElementById('tabTill');
+let state = loadState();
+let toastTimer;
 
-const bizNameInput = document.getElementById('bizName');
-const customerNameInput = document.getElementById('customerName');
-const itemNameInput = document.getElementById('itemName');
-const itemPriceInput = document.getElementById('itemPrice');
-const itemVatCheckbox = document.getElementById('itemVat');
-const addItemBtn = document.getElementById('addItemBtn');
-const clearListBtn = document.getElementById('clearListBtn');
-const itemsListEl = document.getElementById('itemsList');
-const receiptPreview = document.getElementById('receiptPreview');
-const copyReceiptBtn = document.getElementById('copyReceiptBtn');
-const printBtn = document.getElementById('printBtn');
-const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-const themeToggle = document.getElementById('themeToggle');
-const themeIcon = document.getElementById('themeIcon');
+// Current common Kenya M-PESA brackets. Keep the data table-driven for easy updates.
+const tariffTables = {
+  p2p: {
+    leftLabel: "Send fee",
+    rightLabel: "Agent withdrawal",
+    note: "Fees are bracket based. Agent withdrawal is unavailable below KSh 50.",
+    left: [
+      [1, 100, 0],
+      [101, 500, 7],
+      [501, 1000, 13],
+      [1001, 1500, 23],
+      [1501, 2500, 33],
+      [2501, 3500, 53],
+      [3501, 5000, 57],
+      [5001, 7500, 78],
+      [7501, 10000, 90],
+      [10001, 15000, 100],
+      [15001, 20000, 105],
+      [20001, 250000, 108]
+    ],
+    right: [
+      [50, 100, 11],
+      [101, 500, 29],
+      [501, 1000, 29],
+      [1001, 1500, 29],
+      [1501, 2500, 29],
+      [2501, 3500, 52],
+      [3501, 5000, 69],
+      [5001, 7500, 87],
+      [7501, 10000, 115],
+      [10001, 15000, 167],
+      [15001, 20000, 185],
+      [20001, 35000, 197],
+      [35001, 50000, 278],
+      [50001, 250000, 309]
+    ]
+  },
+  paybill: {
+    leftLabel: "Customer charge",
+    rightLabel: "Business charge",
+    note: "Customer Paybill charges usually follow send-money brackets. Confirm special business tariffs with Safaricom.",
+    left: [
+      [1, 100, 0],
+      [101, 500, 7],
+      [501, 1000, 13],
+      [1001, 1500, 23],
+      [1501, 2500, 33],
+      [2501, 3500, 53],
+      [3501, 5000, 57],
+      [5001, 7500, 78],
+      [7501, 10000, 90],
+      [10001, 15000, 100],
+      [15001, 250000, 108]
+    ],
+    right: [[1, 250000, 0]]
+  },
+  till: {
+    leftLabel: "Customer charge",
+    rightLabel: "Merchant estimate",
+    note: "Buy Goods is free for customers. Merchant commission is estimated at 0.5%, capped at KSh 200.",
+    left: [[1, 250000, 0]],
+    right: "merchant"
+  }
+};
 
-// Theme Management
-function initTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-        themeIcon.textContent = '🌙';
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return saved ? mergeState(defaultState, saved) : structuredClone(defaultState);
+  } catch {
+    return structuredClone(defaultState);
+  }
+}
+
+function mergeState(base, saved) {
+  return {
+    ...base,
+    ...saved,
+    business: { ...base.business, ...(saved.business || {}) },
+    items: Array.isArray(saved.items) ? saved.items : []
+  };
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function formatMoney(value) {
+  return `KSh ${Number(value || 0).toLocaleString("en-KE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function formatReceiptNumber(value) {
+  return String(value).padStart(4, "0");
+}
+
+function findBracket(amount, table) {
+  if (amount <= 0) return 0;
+  const bracket = table.find(([min, max]) => amount >= min && amount <= max);
+  return bracket ? bracket[2] : null;
+}
+
+function calculateTariff() {
+  const amount = Number(els.mpesaAmount.value) || 0;
+  const table = tariffTables[state.mode];
+  const left = findBracket(amount, table.left);
+  let right = table.right === "merchant" ? Math.min(amount * 0.005, 200) : findBracket(amount, table.right);
+
+  if (amount > 250000) {
+    els.costLeft.textContent = "Limit";
+    els.costRight.textContent = "Limit";
+    els.tariffNote.textContent = "The calculator supports transactions up to KSh 250,000.";
+    return;
+  }
+
+  els.labelOutputLeft.textContent = table.leftLabel;
+  els.labelOutputRight.textContent = table.rightLabel;
+  els.costLeft.textContent = left === null ? "N/A" : formatMoney(left);
+  els.costRight.textContent = right === null ? "N/A" : formatMoney(right);
+  els.tariffNote.textContent = table.note;
+}
+
+function applyTheme() {
+  document.documentElement.classList.toggle("dark", state.theme === "dark");
+  els.themeIcon.textContent = state.theme === "dark" ? "Light" : "Dark";
+}
+
+function syncFormFromState() {
+  els.businessName.value = state.business.name;
+  els.businessPhone.value = state.business.phone;
+  els.businessLocation.value = state.business.location;
+  els.businessPin.value = state.business.pin;
+  els.customerName.value = state.customerName;
+  els.receiptNumberLabel.textContent = `Receipt #${formatReceiptNumber(state.receiptNumber)}`;
+
+  els.segments.forEach((segment) => {
+    segment.classList.toggle("active", segment.dataset.mode === state.mode);
+  });
+}
+
+function updateBusinessState() {
+  state.business.name = els.businessName.value.trim();
+  state.business.phone = els.businessPhone.value.trim();
+  state.business.location = els.businessLocation.value.trim();
+  state.business.pin = els.businessPin.value.trim();
+  state.customerName = els.customerName.value.trim();
+  saveAndRender();
+}
+
+function getLineTotals(item) {
+  const qty = Number(item.qty) || 1;
+  const price = Number(item.price) || 0;
+  const total = qty * price;
+  const vat = item.vat ? total - total / 1.16 : 0;
+  return { qty, price, total, vat };
+}
+
+function getReceiptTotals() {
+  return state.items.reduce(
+    (totals, item) => {
+      const line = getLineTotals(item);
+      totals.subtotal += line.total - line.vat;
+      totals.vat += line.vat;
+      totals.total += line.total;
+      return totals;
+    },
+    { subtotal: 0, vat: 0, total: 0 }
+  );
+}
+
+function renderItems() {
+  if (!state.items.length) {
+    els.itemsList.innerHTML = '<div class="empty-state">No items yet. Add the first sale item above.</div>';
+    return;
+  }
+
+  els.itemsList.innerHTML = state.items.map((item) => {
+    const line = getLineTotals(item);
+    return `
+      <article class="receipt-item">
+        <div>
+          <strong>${escapeHtml(item.name)}</strong>
+          <small>${line.qty} x ${formatMoney(line.price)}${item.vat ? " - VAT included" : ""}</small>
+        </div>
+        <div>
+          <div class="item-total">${formatMoney(line.total)}</div>
+          <div class="item-actions">
+            <button class="item-action" type="button" data-action="edit" data-id="${item.id}" title="Edit item">Edit</button>
+            <button class="item-action" type="button" data-action="delete" data-id="${item.id}" title="Delete item">Del</button>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function buildReceiptText() {
+  const now = new Date();
+  const date = now.toLocaleDateString("en-KE", {
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  });
+  const time = now.toLocaleTimeString("en-KE", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+  const businessName = state.business.name || "My Duka";
+  const totals = getReceiptTotals();
+  const lines = [
+    businessName.toUpperCase(),
+    state.business.phone ? `Tel: ${state.business.phone}` : "",
+    state.business.location ? `Location: ${state.business.location}` : "",
+    state.business.pin ? `PIN/Note: ${state.business.pin}` : "",
+    "--------------------------------",
+    `Receipt: #${formatReceiptNumber(state.receiptNumber)}`,
+    `Date: ${date}`,
+    `Time: ${time}`,
+    state.customerName ? `Customer: ${state.customerName}` : "Customer: Walk-in",
+    "--------------------------------"
+  ].filter(Boolean);
+
+  if (!state.items.length) {
+    lines.push("No items added yet.");
+  } else {
+    state.items.forEach((item, index) => {
+      const line = getLineTotals(item);
+      lines.push(`${index + 1}. ${item.name}`);
+      lines.push(`   ${line.qty} x ${formatMoney(line.price)} = ${formatMoney(line.total)}`);
+      if (item.vat) lines.push(`   VAT incl: ${formatMoney(line.vat)}`);
+    });
+  }
+
+  lines.push("--------------------------------");
+  lines.push(`Subtotal: ${formatMoney(totals.subtotal)}`);
+  if (totals.vat > 0) lines.push(`VAT 16%:  ${formatMoney(totals.vat)}`);
+  lines.push(`TOTAL:    ${formatMoney(totals.total)}`);
+  lines.push("--------------------------------");
+  lines.push("Thank you. Karibu tena.");
+  lines.push("Powered by BiasharaKit");
+
+  return lines.join("\n");
+}
+
+function renderReceipt() {
+  els.receiptNumberLabel.textContent = `Receipt #${formatReceiptNumber(state.receiptNumber)}`;
+  els.receiptPreview.textContent = buildReceiptText();
+}
+
+function saveAndRender() {
+  saveState();
+  renderItems();
+  renderReceipt();
+}
+
+function resetItemForm() {
+  els.editingItemId.value = "";
+  els.itemName.value = "";
+  els.itemQty.value = "1";
+  els.itemPrice.value = "";
+  els.itemVat.checked = false;
+  els.saveItemBtn.textContent = "Add item";
+  els.cancelEditBtn.classList.add("hidden");
+}
+
+function saveItem(event) {
+  event.preventDefault();
+  const name = els.itemName.value.trim();
+  const qty = Math.max(1, Number(els.itemQty.value) || 1);
+  const price = Number(els.itemPrice.value);
+  const editingId = els.editingItemId.value;
+
+  if (!name || !Number.isFinite(price) || price <= 0) {
+    showToast("Enter an item name and a valid price.");
+    return;
+  }
+
+  const item = {
+    id: editingId || crypto.randomUUID(),
+    name,
+    qty,
+    price,
+    vat: els.itemVat.checked
+  };
+
+  if (editingId) {
+    state.items = state.items.map((current) => current.id === editingId ? item : current);
+    showToast("Item updated.");
+  } else {
+    state.items.push(item);
+    showToast("Item added.");
+  }
+
+  resetItemForm();
+  saveAndRender();
+}
+
+function editItem(id) {
+  const item = state.items.find((current) => current.id === id);
+  if (!item) return;
+
+  els.editingItemId.value = item.id;
+  els.itemName.value = item.name;
+  els.itemQty.value = item.qty;
+  els.itemPrice.value = item.price;
+  els.itemVat.checked = item.vat;
+  els.saveItemBtn.textContent = "Save item";
+  els.cancelEditBtn.classList.remove("hidden");
+  els.itemName.focus();
+}
+
+function deleteItem(id) {
+  state.items = state.items.filter((item) => item.id !== id);
+  resetItemForm();
+  saveAndRender();
+  showToast("Item deleted.");
+}
+
+function clearItems() {
+  if (!state.items.length) return;
+  if (!confirm("Clear all receipt items?")) return;
+  state.items = [];
+  resetItemForm();
+  saveAndRender();
+  showToast("Receipt items cleared.");
+}
+
+function startNewReceipt() {
+  if (state.items.length && !confirm("Start a new receipt and clear current items?")) return;
+  state.nextReceiptNumber = Math.max(state.nextReceiptNumber, state.receiptNumber + 1);
+  state.receiptNumber = state.nextReceiptNumber;
+  state.nextReceiptNumber += 1;
+  state.customerName = "";
+  state.items = [];
+  els.customerName.value = "";
+  resetItemForm();
+  saveAndRender();
+  showToast(`Started receipt #${formatReceiptNumber(state.receiptNumber)}.`);
+}
+
+async function copyReceipt() {
+  const text = buildReceiptText();
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("Receipt copied.");
+  } catch {
+    fallbackCopy(text);
+    showToast("Receipt copied.");
+  }
+}
+
+function fallbackCopy(text) {
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  document.execCommand("copy");
+  textarea.remove();
+}
+
+function printReceipt() {
+  window.print();
+}
+
+function downloadPdf() {
+  const text = buildReceiptText();
+  const pdfBytes = createSimplePdf(text);
+  const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `receipt-${formatReceiptNumber(state.receiptNumber)}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("PDF downloaded.");
+}
+
+// Minimal PDF writer so the app can export without external libraries.
+function createSimplePdf(text) {
+  const safeLines = text.split("\n").flatMap((line) => wrapPdfLine(line, 58));
+  const commands = ["BT", "/F1 10 Tf", "48 790 Td", "14 TL"];
+  safeLines.forEach((line, index) => {
+    if (index > 0) commands.push("T*");
+    commands.push(`(${escapePdf(line)}) Tj`);
+  });
+  commands.push("ET");
+
+  const stream = commands.join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>",
+    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`
+  ];
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(pdf.length);
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+
+  const xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.slice(1).forEach((offset) => {
+    pdf += `${String(offset).padStart(10, "0")} 00000 n \n`;
+  });
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+
+  return new Uint8Array([...pdf].map((char) => char.charCodeAt(0)));
+}
+
+function wrapPdfLine(line, maxLength) {
+  if (line.length <= maxLength) return [line];
+  const words = line.split(" ");
+  const lines = [];
+  let current = "";
+  words.forEach((word) => {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxLength) {
+      lines.push(current);
+      current = word;
     } else {
-        themeIcon.textContent = '☀️';
+      current = next;
     }
+  });
+  if (current) lines.push(current);
+  return lines;
 }
 
-themeToggle.addEventListener('click', () => {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    themeIcon.textContent = isDark ? '🌙' : '☀️';
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-});
+function escapePdf(text) {
+  return text.replace(/[\\()]/g, "\\$&").replace(/[^\x20-\x7E]/g, "");
+}
 
-// Tab Switching
-function switchTab(mode, activeTab, inactive1, inactive2) {
-    calculationMode = mode;
-    
-    // Reset all tabs
-    [tabP2P, tabPaybill, tabTill].forEach(tab => {
-        tab.classList.remove('active', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-amber-600');
-        tab.classList.add('text-slate-600', 'dark:text-slate-400');
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;"
+  }[char]));
+}
+
+function showToast(message) {
+  clearTimeout(toastTimer);
+  els.toast.textContent = message;
+  els.toast.classList.add("show");
+  toastTimer = setTimeout(() => els.toast.classList.remove("show"), 2200);
+}
+
+function bindEvents() {
+  els.themeToggle.addEventListener("click", () => {
+    state.theme = state.theme === "dark" ? "light" : "dark";
+    applyTheme();
+    saveState();
+  });
+
+  els.segments.forEach((segment) => {
+    segment.addEventListener("click", () => {
+      state.mode = segment.dataset.mode;
+      syncFormFromState();
+      calculateTariff();
+      saveState();
     });
-    
-    activeTab.classList.add('active', 'bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-amber-600');
-    
-    runTariffCalculation();
+  });
+
+  els.mpesaAmount.addEventListener("input", calculateTariff);
+  [els.businessName, els.businessPhone, els.businessLocation, els.businessPin, els.customerName].forEach((input) => {
+    input.addEventListener("input", updateBusinessState);
+  });
+
+  els.receiptForm.addEventListener("submit", saveItem);
+  els.cancelEditBtn.addEventListener("click", resetItemForm);
+  els.clearListBtn.addEventListener("click", clearItems);
+  els.newReceiptBtn.addEventListener("click", startNewReceipt);
+  els.copyReceiptBtn.addEventListener("click", copyReceipt);
+  els.printBtn.addEventListener("click", printReceipt);
+  els.downloadPdfBtn.addEventListener("click", downloadPdf);
+
+  els.itemsList.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) return;
+    if (button.dataset.action === "edit") editItem(button.dataset.id);
+    if (button.dataset.action === "delete") deleteItem(button.dataset.id);
+  });
 }
 
-// Attach tab listeners
-tabP2P.addEventListener('click', () => switchTab('P2P', tabP2P, tabPaybill, tabTill));
-tabPaybill.addEventListener('click', () => switchTab('PAYBILL', tabPaybill, tabP2P, tabTill));
-tabTill.addEventListener('click', () => switchTab('TILL', tabTill, tabP2P, tabPaybill));
-
-// M-PESA Tariff Engine (Fixed & Optimized)
-function runTariffCalculation() {
-    const amount = parseFloat(mpesaInput.value) || 0;
-    
-    if (calculationMode === 'P2P') {
-        labelOutputLeft.textContent = "Send to M-Pesa (P2P)";
-        labelOutputRight.textContent = "Agent Withdrawal";
-        
-        let sendFee = 0;
-        let withdrawFee = 0;
-
-        if (amount >= 1 && amount <= 49) { 
-            sendFee = 0; withdrawFee = 0; 
-        } else if (amount >= 50 && amount <= 100) { 
-            sendFee = 0; withdrawFee = 11; 
-        } else if (amount >= 101 && amount <= 500) { 
-            sendFee = 7; withdrawFee = 29; 
-        } else if (amount >= 501 && amount <= 1000) { 
-            sendFee = 13; withdrawFee = 29; 
-        } else if (amount >= 1001 && amount <= 1500) { 
-            sendFee = 23; withdrawFee = 29; 
-        } else if (amount >= 1501 && amount <= 2500) { 
-            sendFee = 33; withdrawFee = 29; 
-        } else if (amount >= 2501 && amount <= 3500) { 
-            sendFee = 56; withdrawFee = 52; 
-        } else if (amount >= 3501 && amount <= 5000) { 
-            sendFee = 57; withdrawFee = 69; 
-        } else if (amount >= 5001 && amount <= 7500) { 
-            sendFee = 78; withdrawFee = 87; 
-        } else if (amount >= 7501 && amount <= 10000) { 
-            sendFee = 90; withdrawFee = 115; 
-        } else if (amount >= 10001 && amount <= 15000) { 
-            sendFee = 100; withdrawFee = 167; 
-        } else if (amount >= 15001 && amount <= 20000) { 
-            sendFee = 105; withdrawFee = 185; 
-        } else if (amount >= 20001 && amount <= 250000) { 
-            sendFee = 108; withdrawFee = 309; 
-        } else if (amount > 250000) {
-            sendFee = 108; withdrawFee = "Limit Exceeded";
-        }
-
-        costLeft.textContent = `Ksh ${sendFee}`;
-        costRight.textContent = typeof withdrawFee === 'number' ? `Ksh ${withdrawFee}` : withdrawFee;
-
-    } else if (calculationMode === 'PAYBILL') {
-        labelOutputLeft.textContent = "Customer Paybill Fee";
-        labelOutputRight.textContent = "Business Absorbs";
-        
-        let customerCharge = 0;
-        if (amount <= 100) customerCharge = 0;
-        else if (amount <= 500) customerCharge = 7;
-        else if (amount <= 1000) customerCharge = 13;
-        else if (amount <= 1500) customerCharge = 23;
-        else if (amount <= 2500) customerCharge = 33;
-        else if (amount <= 3500) customerCharge = 53;
-        else if (amount <= 5000) customerCharge = 57;
-        else if (amount <= 7500) customerCharge = 78;
-        else if (amount <= 10000) customerCharge = 90;
-        else customerCharge = 108;
-
-        costLeft.textContent = `Ksh ${customerCharge}`;
-        costRight.textContent = `Ksh 0`;
-
-    } else if (calculationMode === 'TILL') {
-        labelOutputLeft.textContent = "Customer (Free)";
-        labelOutputRight.textContent = "Merchant Commission";
-        
-        let merchantFee = amount <= 200 ? 0 : Math.min(amount * 0.005, 200);
-        costLeft.textContent = `Ksh 0`;
-        costRight.textContent = `Ksh ${merchantFee.toFixed(2)}`;
-    }
+function init() {
+  bindEvents();
+  applyTheme();
+  syncFormFromState();
+  calculateTariff();
+  renderItems();
+  renderReceipt();
 }
 
-mpesaInput.addEventListener('input', runTariffCalculation);
-
-// Receipt Management
-function renderItemsList() {
-    itemsListEl.innerHTML = '';
-    
-    if (receiptItems.length === 0) {
-        itemsListEl.innerHTML = `<div class="text-center py-12 text-slate-400 dark:text-slate-500 italic">No items added yet...</div>`;
-        return;
-    }
-    
-    receiptItems.forEach((item, index) => {
-        const itemEl = document.createElement('div');
-        itemEl.className = `receipt-item flex justify-between items-center bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 group`;
-        
-        itemEl.innerHTML = `
-            <div class="flex-1">
-                <div class="font-medium">${item.name}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400">Ksh ${item.price.toFixed(2)} ${item.vatAmount > 0 ? '(VAT incl.)' : ''}</div>
-            </div>
-            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                <button onclick="editItem(${index})" class="text-amber-500 hover:text-amber-600 p-1">✏️</button>
-                <button onclick="deleteItem(${index})" class="text-rose-500 hover:text-rose-600 p-1">🗑️</button>
-            </div>
-        `;
-        
-        itemsListEl.appendChild(itemEl);
-    });
-}
-
-window.editItem = function(index) {
-    const item = receiptItems[index];
-    itemNameInput.value = item.name;
-    itemPriceInput.value = item.price;
-    itemVatCheckbox.checked = item.vatAmount > 0;
-    receiptItems.splice(index, 1);
-    renderItemsList();
-    updateReceiptDisplay();
-};
-
-window.deleteItem = function(index) {
-    if (confirm('Delete this item?')) {
-        receiptItems.splice(index, 1);
-        renderItemsList();
-        updateReceiptDisplay();
-    }
-};
-
-addItemBtn.addEventListener('click', () => {
-    const name = itemNameInput.value.trim();
-    const price = parseFloat(itemPriceInput.value) || 0;
-    const isVat = itemVatCheckbox.checked;
-
-    if (!name || price <= 0) {
-        alert("Please enter valid item name and price");
-        return;
-    }
-
-    let vatAmount = 0;
-    if (isVat) {
-        vatAmount = price - (price / 1.16);
-    }
-
-    receiptItems.push({ name, price, vatAmount });
-    
-    itemNameInput.value = '';
-    itemPriceInput.value = '';
-    itemVatCheckbox.checked = false;
-    
-    renderItemsList();
-    updateReceiptDisplay();
-});
-
-clearListBtn.addEventListener('click', () => {
-    if (confirm('Clear all items?')) {
-        receiptItems = [];
-        renderItemsList();
-        updateReceiptDisplay();
-    }
-});
-
-// Receipt Display
-function updateReceiptDisplay() {
-    const storeName = bizNameInput.value.trim().toUpperCase() || "MY DUKA";
-    const customerName = customerNameInput.value.trim();
-    const currentDate = new Date().toLocaleDateString('en-KE', { 
-        weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' 
-    });
-    const currentTime = new Date().toLocaleTimeString('en-KE', { 
-        hour: '2-digit', minute: '2-digit' 
-    });
-
-    let total = 0;
-    let totalVat = 0;
-    
-    let text = `*🧾 ${storeName}*\n`;
-    text += `📍 Receipt #${String(receiptNumber).padStart(4, '0')}\n`;
-    text += `📅 ${currentDate}   ⏰ ${currentTime}\n`;
-    
-    if (customerName) text += `👤 Customer: ${customerName}\n`;
-    text += `--------------------------------\n\n`;
-
-    receiptItems.forEach((item, i) => {
-        text += `${i+1}. ${item.name}\n   Ksh ${item.price.toFixed(2)}\n`;
-        total += item.price;
-        totalVat += item.vatAmount;
-    });
-
-    text += `\n--------------------------------\n`;
-    if (totalVat > 0) text += `VAT (16% KRA): Ksh ${totalVat.toFixed(2)}\n`;
-    text += `*TOTAL: Ksh ${total.toFixed(2)}*\n\n`;
-    text += `Thank you! Karibu tena 🙏\n`;
-    text += `_Powered by BiasharaKit v2.1_`;
-
-    receiptPreview.textContent = text;
-}
-
-// Copy, Print, PDF
-copyReceiptBtn.addEventListener('click', () => {
-    if (receiptItems.length === 0) return alert("Add some items first!");
-    
-    navigator.clipboard.writeText(receiptPreview.textContent).then(() => {
-        const orig = copyReceiptBtn.innerHTML;
-        copyReceiptBtn.innerHTML = `✅ Copied!`;
-        setTimeout(() => copyReceiptBtn.innerHTML = orig, 1800);
-    });
-});
-
-printBtn.addEventListener('click', () => {
-    if (receiptItems.length === 0) return;
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`<html><head><title>Receipt</title><style>body{font-family:monospace;padding:40px;}</style></head><body>${receiptPreview.innerHTML.replace(/\n/g, '<br>')}</body></html>`);
-    printWindow.document.close();
-    setTimeout(() => printWindow.print(), 500);
-});
-
-downloadPdfBtn.addEventListener('click', () => {
-    if (receiptItems.length === 0) return alert("No items to export");
-    printBtn.click();
-});
-
-// Local Storage
-function saveToLocalStorage() {
-    localStorage.setItem('biashara_receiptItems', JSON.stringify(receiptItems));
-    localStorage.setItem('biashara_bizName', bizNameInput.value);
-    localStorage.setItem('biashara_customerName', customerNameInput.value);
-}
-
-function loadFromLocalStorage() {
-    const savedItems = localStorage.getItem('biashara_receiptItems');
-    if (savedItems) receiptItems = JSON.parse(savedItems);
-    
-    const savedBiz = localStorage.getItem('biashara_bizName');
-    if (savedBiz) bizNameInput.value = savedBiz;
-    
-    const savedCustomer = localStorage.getItem('biashara_customerName');
-    if (savedCustomer) customerNameInput.value = savedCustomer;
-    
-    renderItemsList();
-    updateReceiptDisplay();
-}
-
-function setupAutoSave() {
-    [bizNameInput, customerNameInput].forEach(el => {
-        el.addEventListener('input', () => {
-            saveToLocalStorage();
-            updateReceiptDisplay();
-        });
-    });
-}
-
-// Initialize
-function initializeApp() {
-    initTheme();
-    loadFromLocalStorage();
-    setupAutoSave();
-    runTariffCalculation();
-    updateReceiptDisplay();
-    
-    receiptNumber = parseInt(localStorage.getItem('receiptNumber') || '1');
-    localStorage.setItem('receiptNumber', receiptNumber + 1);
-}
-
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener("DOMContentLoaded", init);

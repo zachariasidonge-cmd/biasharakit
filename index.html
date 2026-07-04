@@ -1,175 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiasharaKit v2.1 - Premium SME Hub</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiasharaKit - SME Receipt & M-PESA Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-300">
-    <!-- Top Navigation -->
-    <nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner">🇰🇪</div>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tighter">BiasharaKit</h1>
-                    <p class="text-[10px] text-slate-500 dark:text-slate-400 -mt-1">v2.1 Offline</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <button id="themeToggle" class="p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                    <span id="themeIcon" class="text-xl">🌞</span>
-                </button>
-                <span class="text-xs px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-full font-medium flex items-center gap-1">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                    100% OFFLINE
-                </span>
-            </div>
+<body>
+  <nav class="topbar">
+    <a class="brand" href="#top" aria-label="BiasharaKit home">
+      <span class="brand-mark">BK</span>
+      <span>
+        <strong>BiasharaKit</strong>
+        <small>Offline SME toolkit</small>
+      </span>
+    </a>
+
+    <div class="topbar-actions">
+      <span class="status-pill"><span></span> Autosaved</span>
+      <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <span id="themeIcon" aria-hidden="true">Dark</span>
+      </button>
+    </div>
+  </nav>
+
+  <main id="top" class="app-shell">
+    <header class="page-intro">
+      <div>
+        <p class="eyebrow">Built for Kenyan SMEs</p>
+        <h1>Receipts, M-PESA fees, and daily sales in one fast workspace.</h1>
+      </div>
+      <button class="secondary-button" id="newReceiptBtn" type="button">New receipt</button>
+    </header>
+
+    <section class="module tariff-module" aria-labelledby="tariffTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">M-PESA calculator</p>
+          <h2 id="tariffTitle">Tariff engine</h2>
         </div>
-    </nav>
-
-    <main class="max-w-5xl mx-auto p-6 space-y-10">
-        <!-- M-PESA CALCULATOR MODULE -->
-        <section class="glass rounded-3xl p-8 shadow-xl">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="text-4xl">💰</div>
-                <div>
-                    <h2 class="text-2xl font-semibold tracking-tight">M-Pesa Tariff Engine</h2>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm">Real-time fees • Updated 2026</p>
-                </div>
-            </div>
-            
-            <!-- Tabs -->
-            <div class="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl mb-8 shadow-inner" role="tablist">
-                <button id="tabP2P" class="tab-btn active px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Send (P2P)</button>
-                <button id="tabPaybill" class="tab-btn px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Paybill</button>
-                <button id="tabTill" class="tab-btn px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Buy Goods (Till)</button>
-            </div>
-
-            <div class="max-w-md">
-                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Transaction Amount (Ksh)</label>
-                <div class="relative">
-                    <input type="number" id="mpesaAmount" placeholder="Enter amount e.g. 4500" 
-                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl px-6 py-5 text-3xl font-medium focus:outline-none transition-all">
-                    <div class="absolute right-6 top-1/2 -translate-y-1/2 text-amber-500 font-mono text-sm">KSH</div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                <div id="outputLeft" class="glass p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
-                    <div id="labelOutputLeft" class="text-xs uppercase tracking-widest text-slate-500 mb-1">Send Fee</div>
-                    <div id="costLeft" class="text-4xl font-semibold text-emerald-600 dark:text-emerald-400">Ksh 0</div>
-                </div>
-                <div id="outputRight" class="glass p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
-                    <div id="labelOutputRight" class="text-xs uppercase tracking-widest text-slate-500 mb-1">Withdrawal Fee</div>
-                    <div id="costRight" class="text-4xl font-semibold text-rose-600 dark:text-rose-400">Ksh 0</div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RECEIPT BUILDER MODULE -->
-        <section class="glass rounded-3xl p-8 shadow-xl">
-            <div class="flex justify-between items-start mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="text-4xl">🧾</div>
-                    <div>
-                        <h2 class="text-2xl font-semibold tracking-tight">Smart Receipt Builder</h2>
-                        <p class="text-slate-500 dark:text-slate-400">VAT compliant • WhatsApp ready</p>
-                    </div>
-                </div>
-                <div class="flex gap-2">
-                    <button id="printBtn" class="px-5 py-2 text-sm font-medium flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition">
-                        🖨️ Print
-                    </button>
-                    <button id="downloadPdfBtn" class="px-5 py-2 text-sm font-medium flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition">
-                        📄 PDF
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid lg:grid-cols-5 gap-8">
-                <!-- Receipt Inputs -->
-                <div class="lg:col-span-3 space-y-6">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Business Name</label>
-                            <input type="text" id="bizName" value="My Duka" 
-                                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Customer Name (Optional)</label>
-                            <input type="text" id="customerName" placeholder="John Doe" 
-                                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
-                        </div>
-                    </div>
-
-                    <!-- Item Input -->
-                    <div class="bg-white/70 dark:bg-slate-900/70 p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
-                        <div class="grid grid-cols-12 gap-3">
-                            <div class="col-span-12 sm:col-span-5">
-                                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Item Name</label>
-                                <input type="text" id="itemName" placeholder="Maziwa 500ml" 
-                                       class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
-                            </div>
-                            <div class="col-span-6 sm:col-span-3">
-                                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Price (Ksh)</label>
-                                <input type="number" id="itemPrice" placeholder="120" 
-                                       class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
-                            </div>
-                            <div class="col-span-6 sm:col-span-4 flex flex-col justify-end">
-                                <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="checkbox" id="itemVat" class="w-5 h-5 accent-amber-500">
-                                    <span class="text-slate-600 dark:text-slate-400">16% VAT</span>
-                                </label>
-                                <button id="addItemBtn" 
-                                        class="mt-2 w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-semibold py-3 rounded-2xl transition-all active:scale-95">
-                                    + Add Item
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Items List -->
-                    <div>
-                        <div class="flex justify-between items-center mb-3 px-1">
-                            <h3 class="font-medium text-sm uppercase tracking-widest">Items List</h3>
-                            <button id="clearListBtn" class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1">
-                                🗑️ Clear All
-                            </button>
-                        </div>
-                        <div id="itemsList" class="space-y-2 min-h-[200px] max-h-[320px] overflow-auto pr-2"></div>
-                    </div>
-                </div>
-
-                <!-- Receipt Preview -->
-                <div class="lg:col-span-2">
-                    <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Live Preview</label>
-                    <div class="bg-slate-900 text-emerald-300 p-6 rounded-3xl font-mono text-sm leading-relaxed h-[460px] overflow-auto border border-slate-700 shadow-inner" id="receiptPreviewContainer">
-                        <pre id="receiptPreview" class="whitespace-pre-wrap text-emerald-400"></pre>
-                    </div>
-                    
-                    <div class="mt-4 flex gap-3">
-                        <button id="copyReceiptBtn" 
-                                class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-[0.985]">
-                            📋 Copy for WhatsApp
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer Info -->
-        <div class="text-center text-xs text-slate-400 dark:text-slate-500">
-            Built for Kenyan SMEs • Data saved locally • Supports dark mode
+        <div class="segmented-control" role="tablist" aria-label="M-PESA transaction type">
+          <button class="segment active" type="button" data-mode="p2p">Send</button>
+          <button class="segment" type="button" data-mode="paybill">Paybill</button>
+          <button class="segment" type="button" data-mode="till">Till</button>
         </div>
-    </main>
+      </div>
 
-    <script src="app.js"></script>
+      <div class="tariff-grid">
+        <label class="field amount-field">
+          <span>Amount</span>
+          <input id="mpesaAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="e.g. 4500">
+        </label>
+
+        <div class="result-card">
+          <span id="labelOutputLeft">Send fee</span>
+          <strong id="costLeft">KSh 0</strong>
+        </div>
+
+        <div class="result-card danger">
+          <span id="labelOutputRight">Withdrawal fee</span>
+          <strong id="costRight">KSh 0</strong>
+        </div>
+      </div>
+
+      <p class="helper-text" id="tariffNote">Enter a transaction amount to calculate charges.</p>
+    </section>
+
+    <section class="receipt-layout" aria-label="Receipt builder">
+      <form class="module receipt-form" id="receiptForm">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Receipt builder</p>
+            <h2>Sale details</h2>
+          </div>
+          <span class="receipt-number" id="receiptNumberLabel">Receipt #0001</span>
+        </div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span>Business name</span>
+            <input id="businessName" type="text" autocomplete="organization" placeholder="My Duka">
+          </label>
+          <label class="field">
+            <span>Business phone</span>
+            <input id="businessPhone" type="tel" autocomplete="tel" placeholder="07xx xxx xxx">
+          </label>
+          <label class="field">
+            <span>Location</span>
+            <input id="businessLocation" type="text" placeholder="Nairobi, Kenya">
+          </label>
+          <label class="field">
+            <span>KRA PIN / Note</span>
+            <input id="businessPin" type="text" placeholder="Optional">
+          </label>
+          <label class="field wide">
+            <span>Customer name</span>
+            <input id="customerName" type="text" autocomplete="name" placeholder="Walk-in customer">
+          </label>
+        </div>
+
+        <div class="item-editor" id="itemEditor">
+          <input type="hidden" id="editingItemId">
+          <label class="field item-name">
+            <span>Item</span>
+            <input id="itemName" type="text" placeholder="Maziwa 500ml">
+          </label>
+          <label class="field small">
+            <span>Qty</span>
+            <input id="itemQty" type="number" min="1" step="1" inputmode="numeric" value="1">
+          </label>
+          <label class="field small">
+            <span>Price</span>
+            <input id="itemPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="120">
+          </label>
+          <label class="toggle-row">
+            <input id="itemVat" type="checkbox">
+            <span>VAT incl.</span>
+          </label>
+          <button class="primary-button" id="saveItemBtn" type="submit">Add item</button>
+          <button class="ghost-button hidden" id="cancelEditBtn" type="button">Cancel</button>
+        </div>
+
+        <div class="items-panel">
+          <div class="panel-title">
+            <h3>Receipt items</h3>
+            <button class="link-button" id="clearListBtn" type="button">Clear all</button>
+          </div>
+          <div id="itemsList" class="items-list" aria-live="polite"></div>
+        </div>
+      </form>
+
+      <aside class="module preview-panel">
+        <div class="section-heading preview-heading">
+          <div>
+            <p class="eyebrow">Live preview</p>
+            <h2>Customer receipt</h2>
+          </div>
+        </div>
+
+        <div class="receipt-paper" id="receiptPaper">
+          <pre id="receiptPreview"></pre>
+        </div>
+
+        <div class="receipt-actions">
+          <button class="primary-button" id="copyReceiptBtn" type="button">Copy</button>
+          <button class="secondary-button" id="printBtn" type="button">Print</button>
+          <button class="secondary-button" id="downloadPdfBtn" type="button">Download PDF</button>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
