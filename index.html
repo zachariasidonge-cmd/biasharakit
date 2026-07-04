@@ -98,8 +98,17 @@
           </label>
           <label class="field wide">
             <span>Customer name</span>
-            <input id="customerName" type="text" autocomplete="name" placeholder="Walk-in customer">
+            <input id="customerName" type="text" autocomplete="name" list="customerNames" placeholder="Walk-in customer">
+            <datalist id="customerNames"></datalist>
           </label>
+        </div>
+
+        <div class="customer-card" id="customerCard">
+          <div>
+            <span class="card-label">Customer lookup</span>
+            <strong id="customerLookupTitle">Type a customer name to retrieve their data.</strong>
+          </div>
+          <div class="customer-stats" id="customerStats"></div>
         </div>
 
         <div class="item-editor" id="itemEditor">
@@ -146,11 +155,47 @@
         </div>
 
         <div class="receipt-actions">
+          <button class="primary-button" id="saveSaleBtn" type="button">Save sale</button>
           <button class="primary-button" id="copyReceiptBtn" type="button">Copy</button>
           <button class="secondary-button" id="printBtn" type="button">Print</button>
           <button class="secondary-button" id="downloadPdfBtn" type="button">Download PDF</button>
         </div>
       </aside>
+    </section>
+
+    <section class="module reports-module" aria-labelledby="reportsTitle">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Owner reports</p>
+          <h2 id="reportsTitle">Monthly sales data</h2>
+        </div>
+        <label class="field month-field">
+          <span>Report month</span>
+          <input id="reportMonth" type="month">
+        </label>
+      </div>
+
+      <div class="report-summary" id="reportSummary"></div>
+
+      <div class="report-actions">
+        <button class="secondary-button" id="downloadCsvBtn" type="button">Download CSV</button>
+        <button class="primary-button" id="downloadReportPdfBtn" type="button">Download full report PDF</button>
+      </div>
+
+      <div class="sales-table-wrap">
+        <table class="sales-table">
+          <thead>
+            <tr>
+              <th>Receipt</th>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="salesTableBody"></tbody>
+        </table>
+      </div>
     </section>
   </main>
 
