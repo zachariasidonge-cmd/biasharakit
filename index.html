@@ -3,114 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiasharaKit v2 - Premium SME Hub</title>
+    <title>BiasharaKit v2.1 - Premium SME Hub</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
-
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased min-h-screen transition-colors duration-300">
     <!-- Top Navigation -->
-    <nav class="bg-indigo-600 text-white p-4 shadow-md sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wide">🇰🇪 BiasharaKit <span class="text-xs text-indigo-200 font-normal">v2.0</span></h1>
-            <span class="text-xs bg-indigo-700 px-3 py-1 rounded-full border border-indigo-400 font-medium">100% Offline-First</span>
+    <nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-gradient-to-br from-amber-400 to-yellow-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-inner">🇰🇪</div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tighter">BiasharaKit</h1>
+                    <p class="text-[10px] text-slate-500 dark:text-slate-400 -mt-1">v2.1 Offline</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <button id="themeToggle" class="p-2 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <span id="themeIcon" class="text-xl">🌞</span>
+                </button>
+                <span class="text-xs px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 rounded-full font-medium flex items-center gap-1">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    100% OFFLINE
+                </span>
+            </div>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto p-4 space-y-8">
-        
-        <!-- MODULE 1: UPGRADED M-PESA & LIPA NA M-PESA CALCULATOR -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <div class="flex items-center space-x-2 mb-4">
-                <span class="text-2xl">💰</span>
-                <h2 class="text-lg font-bold text-slate-900">M-Pesa & Lipa Na M-Pesa Rate Engine</h2>
-            </div>
-            
-            <!-- Channel Tab Selector -->
-            <div class="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl mb-6">
-                <button id="tabP2P" class="py-2 text-xs font-semibold rounded-lg bg-white text-indigo-600 shadow-sm transition">Send Money (P2P)</button>
-                <button id="tabPaybill" class="py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">Paybill (C2B)</button>
-                <button id="tabTill" class="py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition">Buy Goods (Till)</button>
-            </div>
-            
-            <div class="space-y-4">
+    <main class="max-w-5xl mx-auto p-6 space-y-10">
+        <!-- M-PESA CALCULATOR MODULE -->
+        <section class="glass rounded-3xl p-8 shadow-xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="text-4xl">💰</div>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Transaction Amount (Ksh)</label>
-                    <input type="number" id="mpesaAmount" placeholder="e.g. 2500" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:border-indigo-500 text-lg font-medium">
+                    <h2 class="text-2xl font-semibold tracking-tight">M-Pesa Tariff Engine</h2>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Real-time fees • Updated 2026</p>
                 </div>
-                
-                <!-- Advanced Multi-Output Breakdowns -->
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                        <span id="labelOutputLeft" class="text-xs text-slate-500 block">Send to M-Pesa User</span>
-                        <span id="costLeft" class="text-xl font-bold text-slate-900">Ksh 0</span>
-                    </div>
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                        <span id="labelOutputRight" class="text-xs text-slate-500 block">Agent Withdrawal Fee</span>
-                        <span id="costRight" class="text-xl font-bold text-slate-900">Ksh 0</span>
-                    </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="inline-flex bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl mb-8 shadow-inner" role="tablist">
+                <button id="tabP2P" class="tab-btn active px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Send (P2P)</button>
+                <button id="tabPaybill" class="tab-btn px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Paybill</button>
+                <button id="tabTill" class="tab-btn px-6 py-3 text-sm font-semibold rounded-[14px] transition-all">Buy Goods (Till)</button>
+            </div>
+
+            <div class="max-w-md">
+                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Transaction Amount (Ksh)</label>
+                <div class="relative">
+                    <input type="number" id="mpesaAmount" placeholder="Enter amount e.g. 4500" 
+                           class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-amber-400 rounded-2xl px-6 py-5 text-3xl font-medium focus:outline-none transition-all">
+                    <div class="absolute right-6 top-1/2 -translate-y-1/2 text-amber-500 font-mono text-sm">KSH</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                <div id="outputLeft" class="glass p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
+                    <div id="labelOutputLeft" class="text-xs uppercase tracking-widest text-slate-500 mb-1">Send Fee</div>
+                    <div id="costLeft" class="text-4xl font-semibold text-emerald-600 dark:text-emerald-400">Ksh 0</div>
+                </div>
+                <div id="outputRight" class="glass p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
+                    <div id="labelOutputRight" class="text-xs uppercase tracking-widest text-slate-500 mb-1">Withdrawal Fee</div>
+                    <div id="costRight" class="text-4xl font-semibold text-rose-600 dark:text-rose-400">Ksh 0</div>
                 </div>
             </div>
         </section>
 
-        <!-- MODULE 2: WHATSAPP RECEIPT BUILDER WITH KRA VAT TAX RULES -->
-        <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-            <div class="flex items-center space-x-2 mb-4">
-                <span class="text-2xl">📝</span>
-                <h2 class="text-lg font-bold text-slate-900">Smart WhatsApp Receipt Builder (with VAT)</h2>
+        <!-- RECEIPT BUILDER MODULE -->
+        <section class="glass rounded-3xl p-8 shadow-xl">
+            <div class="flex justify-between items-start mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="text-4xl">🧾</div>
+                    <div>
+                        <h2 class="text-2xl font-semibold tracking-tight">Smart Receipt Builder</h2>
+                        <p class="text-slate-500 dark:text-slate-400">VAT compliant • WhatsApp ready</p>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button id="printBtn" class="px-5 py-2 text-sm font-medium flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition">
+                        🖨️ Print
+                    </button>
+                    <button id="downloadPdfBtn" class="px-5 py-2 text-sm font-medium flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition">
+                        📄 PDF
+                    </button>
+                </div>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Input Controls -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Business Name</label>
-                        <input type="text" id="bizName" value="My Duka" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Item Name</label>
-                            <input type="text" id="itemName" placeholder="Sugar 1kg" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+            <div class="grid lg:grid-cols-5 gap-8">
+                <!-- Receipt Inputs -->
+                <div class="lg:col-span-3 space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Business Name</label>
+                            <input type="text" id="bizName" value="My Duka" 
+                                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Price (Ksh)</label>
-                            <input type="number" id="itemPrice" placeholder="160" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 focus:outline-none focus:border-indigo-500 text-sm">
+                            <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Customer Name (Optional)</label>
+                            <input type="text" id="customerName" placeholder="John Doe" 
+                                   class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
                         </div>
                     </div>
-                    
-                    <!-- VAT Settings Option -->
-                    <div class="flex items-center space-x-2 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                        <input type="checkbox" id="itemVat" class="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
-                        <label for="itemVat" class="text-xs font-medium text-slate-700">This item includes 16% KRA VAT</label>
+
+                    <!-- Item Input -->
+                    <div class="bg-white/70 dark:bg-slate-900/70 p-6 rounded-3xl border border-slate-100 dark:border-slate-700">
+                        <div class="grid grid-cols-12 gap-3">
+                            <div class="col-span-12 sm:col-span-5">
+                                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Item Name</label>
+                                <input type="text" id="itemName" placeholder="Maziwa 500ml" 
+                                       class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
+                            </div>
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-1.5">Price (Ksh)</label>
+                                <input type="number" id="itemPrice" placeholder="120" 
+                                       class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl px-5 py-3 focus:outline-none focus:border-amber-400">
+                            </div>
+                            <div class="col-span-6 sm:col-span-4 flex flex-col justify-end">
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="checkbox" id="itemVat" class="w-5 h-5 accent-amber-500">
+                                    <span class="text-slate-600 dark:text-slate-400">16% VAT</span>
+                                </label>
+                                <button id="addItemBtn" 
+                                        class="mt-2 w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-white font-semibold py-3 rounded-2xl transition-all active:scale-95">
+                                    + Add Item
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <button id="addItemBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-xl transition text-sm">
-                        + Add Item to List
-                    </button>
-                    <button id="clearListBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-1.5 rounded-xl transition text-xs">
-                        Clear All Items
-                    </button>
+                    <!-- Items List -->
+                    <div>
+                        <div class="flex justify-between items-center mb-3 px-1">
+                            <h3 class="font-medium text-sm uppercase tracking-widest">Items List</h3>
+                            <button id="clearListBtn" class="text-xs text-rose-500 hover:text-rose-600 flex items-center gap-1">
+                                🗑️ Clear All
+                            </button>
+                        </div>
+                        <div id="itemsList" class="space-y-2 min-h-[200px] max-h-[320px] overflow-auto pr-2"></div>
+                    </div>
                 </div>
 
-                <!-- Live Raw Receipt Preview Panel -->
-                <div class="flex flex-col">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">Receipt Raw Text Preview</label>
-                    <textarea id="receiptPreview" readonly class="w-full bg-slate-900 text-emerald-400 font-mono text-sm p-4 rounded-xl flex-grow h-56 focus:outline-none border-none resize-none" placeholder="Your formatted receipt will update here..."></textarea>
+                <!-- Receipt Preview -->
+                <div class="lg:col-span-2">
+                    <label class="block text-xs font-semibold uppercase tracking-widest text-slate-500 mb-2">Live Preview</label>
+                    <div class="bg-slate-900 text-emerald-300 p-6 rounded-3xl font-mono text-sm leading-relaxed h-[460px] overflow-auto border border-slate-700 shadow-inner" id="receiptPreviewContainer">
+                        <pre id="receiptPreview" class="whitespace-pre-wrap text-emerald-400"></pre>
+                    </div>
                     
-                    <button id="copyReceiptBtn" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl transition text-sm flex items-center justify-center space-x-2">
-                        <span>Copy for WhatsApp</span>
-                    </button>
+                    <div class="mt-4 flex gap-3">
+                        <button id="copyReceiptBtn" 
+                                class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 active:scale-[0.985]">
+                            📋 Copy for WhatsApp
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- ADVERTISEMENT PLACEHOLDER BANNER -->
-        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 text-center ad-banner">
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 block mb-1">Sponsorship Space Available</span>
-            <p class="text-xs text-indigo-900">Are you a local wholesale merchant or micro-lender? Ad spaces here start from Ksh 500/month. Contact: your-email@domain.com</p>
+        <!-- Footer Info -->
+        <div class="text-center text-xs text-slate-400 dark:text-slate-500">
+            Built for Kenyan SMEs • Data saved locally • Supports dark mode
         </div>
-
     </main>
 
     <script src="app.js"></script>
